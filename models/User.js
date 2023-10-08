@@ -27,6 +27,7 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+//hash password
 // use old function syntax so we save our context for "this " use
 UserSchema.pre("save", async function () {
   const salt = await bcryptjs.genSalt(10);
@@ -38,8 +39,19 @@ UserSchema.pre("save", async function () {
 
 // generate token using mongoose method
 UserSchema.methods.createJWT = function () {
-  return jwt.sign({ userId: this._id, name: this.name }, "jwtSecret", {
-    expiresIn: "30d",
-  });
+  return jwt.sign(
+    { userId: this._id, name: this.name },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_LIFETIME,
+    }
+  );
 };
+
+//compare password
+UserSchema.methods.comparePassword = async function (userPassword) {
+  const isMatching = await bcryptjs.compare(userPassword, this.password);
+  return isMatching;
+};
+
 module.exports = mongoose.model("User", UserSchema);

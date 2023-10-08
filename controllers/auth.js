@@ -1,4 +1,4 @@
-const { BadRequestError } = require("../errors");
+const { BadRequestError, UnauthenticatedError } = require("../errors");
 const UserModel = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const bcrypt = require("bcryptjs");
@@ -29,7 +29,26 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  res.send("login user");
+  const { email, password } = req.body;
+  //manually check for provided email and password
+  if (!email || !password) {
+    throw new BadRequestError("Please provide email and password");
+  }
+  //find user in DB
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new UnauthenticatedError("Invalid Credentials");
+  }
+  // compare password
+  const isPasswordCorrect = await user.comparePassword(password);
+
+  //if user exists in DB and password matching send back name and token
+  if (user && isPasswordCorrect) {
+    const token = user.createJWT();
+    res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
+  } else {
+    throw new UnauthenticatedError("Password doesnt match");
+  }
 };
 
 module.exports = { register, login };
