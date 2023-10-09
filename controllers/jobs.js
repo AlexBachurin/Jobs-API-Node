@@ -13,7 +13,17 @@ const getAllJobs = async (req, res) => {
 };
 
 const getSingleJob = async (req, res) => {
-  res.send("Get Single Job");
+  //get job id from params
+  const jobId = req.params.id;
+  // get user id from middleware
+  const userId = req.user.userId;
+
+  const job = await JobModel.findOne({ _id: jobId, createdBy: userId });
+  // check if provided wrong id
+  if (!job) {
+    throw NotFoundError(`No job found with id: ${jobId}`);
+  }
+  res.status(StatusCodes.OK).json({ job });
 };
 
 const createJob = async (req, res) => {
