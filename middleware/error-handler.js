@@ -15,7 +15,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.msg = `${Object.keys(err.keyValue)} already in use`;
     customError.statusCode = 400;
   }
-  //return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err });
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err });
   return res.status(customError.statusCode).json({ msg: customError.msg });
 };
 
