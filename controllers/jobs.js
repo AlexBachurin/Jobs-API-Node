@@ -1,9 +1,15 @@
 const { BadRequestError, NotFoundError } = require("../errors");
+
 const JobModel = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
 
 const getAllJobs = async (req, res) => {
-  res.json(req.user);
+  // get id that associated with user
+  const userId = req.user.userId;
+  // get jobs ONLY associated with user who created job using user id
+  const jobs = await JobModel.find({ createdBy: userId }).sort("createdAt");
+  // send back jobs and count, thats what we looking for in front-end
+  res.status(StatusCodes.OK).json({ jobs, count: jobs.length });
 };
 
 const getSingleJob = async (req, res) => {
