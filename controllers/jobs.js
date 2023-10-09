@@ -35,7 +35,31 @@ const createJob = async (req, res) => {
 };
 
 const updateJob = async (req, res) => {
-  res.send("Update job");
+  //get job id from params
+  const jobId = req.params.id;
+  // get user id from middleware
+  const userId = req.user.userId;
+  // get values to change from req.body
+  const { company, position } = req.body;
+  //if values not provided, send back BadRequest error
+  if (company === "" || position === "") {
+    throw new BadRequestError("Company name and position must be provided");
+  }
+
+  const job = await JobModel.findOneAndUpdate(
+    {
+      _id: jobId,
+      createdBy: userId,
+    },
+    req.body,
+    { new: true, runValidators: true }
+  );
+  // check if provided wrong id
+  if (!job) {
+    throw NotFoundError(`No job found with id: ${jobId}`);
+  }
+
+  res.status(StatusCodes.OK).json({ job });
 };
 
 const deleteJob = async (req, res) => {
