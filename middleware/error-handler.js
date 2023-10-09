@@ -15,7 +15,19 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.msg = `${Object.keys(err.keyValue)} already in use`;
     customError.statusCode = 400;
   }
-  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err });
+  // check for validation error
+  if (err.name === "ValidationError") {
+    console.log(Object.values(err.errors));
+    // get all values for the errors key in error object
+    // iterate through values we missing and take the message, then join back to the string
+    customError.msg = Object.values(err.errors)
+      .map((item) => {
+        return item.message;
+      })
+      .join(",");
+    customError.statusCode = 400;
+  }
+  // return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err });
   return res.status(customError.statusCode).json({ msg: customError.msg });
 };
 
