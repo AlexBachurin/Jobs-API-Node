@@ -63,7 +63,20 @@ const updateJob = async (req, res) => {
 };
 
 const deleteJob = async (req, res) => {
-  res.send("Delete Job");
+  //get job id from params
+  const jobId = req.params.id;
+  // get user id from middleware
+  const userId = req.user.userId;
+
+  const job = await JobModel.findOneAndRemove({
+    _id: jobId,
+    createdBy: userId,
+  });
+  // check if provided wrong id
+  if (!job) {
+    throw new BadRequestError(`No job found with id: ${jobId}`);
+  }
+  res.status(StatusCodes.OK).send();
 };
 
 module.exports = { getAllJobs, getSingleJob, createJob, updateJob, deleteJob };
