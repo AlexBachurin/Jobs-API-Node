@@ -10,12 +10,12 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   // if (err instanceof CustomAPIError) {
   //   return res.status(err.statusCode).json({ msg: err.message });
   // }
-  // duplicate email error
+  // *** DUPLICATE EMAIL ERROR ***
   if (err.code && err.code === 11000) {
     customError.msg = `${Object.keys(err.keyValue)} already in use`;
     customError.statusCode = 400;
   }
-  // check for validation error
+  // *** VALIDATION ERROR ***
   if (err.name === "ValidationError") {
     console.log(Object.values(err.errors));
     // get all values for the errors key in error object
@@ -26,6 +26,11 @@ const errorHandlerMiddleware = (err, req, res, next) => {
       })
       .join(",");
     customError.statusCode = 400;
+  }
+  //  *** CAST ERROR ***
+  if (err.name === "CastError") {
+    customError.msg = `No item found with id: ${err.value}`;
+    customError.statusCode = 404;
   }
   // return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ err });
   return res.status(customError.statusCode).json({ msg: customError.msg });

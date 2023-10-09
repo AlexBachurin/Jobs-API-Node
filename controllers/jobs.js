@@ -21,7 +21,7 @@ const getSingleJob = async (req, res) => {
   const job = await JobModel.findOne({ _id: jobId, createdBy: userId });
   // check if provided wrong id
   if (!job) {
-    throw NotFoundError(`No job found with id: ${jobId}`);
+    throw new NotFoundError(`No job found with id: ${jobId}`);
   }
   res.status(StatusCodes.OK).json({ job });
 };
